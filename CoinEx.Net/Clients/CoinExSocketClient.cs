@@ -47,7 +47,7 @@ namespace CoinEx.Net.Clients
         /// <param name="options">The options to use for this client</param>
         public CoinExSocketClient(CoinExSocketClientOptions options) : base("CoinEx", options)
         {
-            SpotStreams = new CoinExSocketClientSpotStreams(log, this, options);
+            SpotStreams = AddApiClient(new CoinExSocketClientSpotStreams(log, this, options));
 
             AddGenericHandler("Pong", (messageEvent) => { });
             SendPeriodic("Ping", TimeSpan.FromMinutes(1), con => new CoinExSocketRequest(NextId(), ServerSubject, PingAction));
@@ -249,13 +249,6 @@ namespace CoinEx.Net.Clients
         protected override Task<bool> UnsubscribeAsync(SocketConnection connection, SocketSubscription s)
         {
             return Task.FromResult(true);
-        }
-
-        /// <inheritdoc />
-        public override void Dispose()
-        {
-            SpotStreams.Dispose();
-            base.Dispose();
         }
     }
 }

@@ -52,7 +52,7 @@ namespace CoinEx.Net.Clients
             manualParseError = true;
             ParameterPositions[HttpMethod.Delete] = HttpMethodParameterPosition.InUri;
 
-            SpotApi = new CoinExClientSpotApi(log, this, options);
+            SpotApi = AddApiClient(new CoinExClientSpotApi(log, this, options));
         }
         #endregion
 
@@ -134,13 +134,6 @@ namespace CoinEx.Net.Clients
         }
 
         #endregion
-
-        /// <inheritdoc />
-        public override void Dispose()
-        {
-            SpotApi.Dispose();
-            base.Dispose();
-        }
         #endregion
     }
 }
