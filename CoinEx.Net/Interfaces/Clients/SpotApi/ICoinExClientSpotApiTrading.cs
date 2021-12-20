@@ -53,7 +53,7 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
         /// <param name="limit">The number of results per page</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>List of open orders for a symbol</returns>
-        Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenOrdersAsync(string symbol, int page, int limit, CancellationToken ct = default);
+        Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenOrdersAsync(string symbol, int? page = null, int? limit = null, CancellationToken ct = default);
 
         /// <summary>
         /// Retrieves a list of open stop orders for a symbol. Requires API credentials
@@ -64,7 +64,7 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
         /// <param name="limit">The number of results per page</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>List of open orders for a symbol</returns>
-        Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenStopOrdersAsync(string symbol, int page, int limit, CancellationToken ct = default);
+        Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenStopOrdersAsync(string symbol, int? page = null, int? limit = null, CancellationToken ct = default);
 
         /// <summary>
         /// Retrieves a list of executed orders for a symbol in the last 2 days. Requires API credentials
@@ -75,7 +75,7 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
         /// <param name="limit">The number of results per page</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>List of executed orders for a symbol</returns>
-        Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetClosedOrdersAsync(string symbol, int page, int limit, CancellationToken ct = default);
+        Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetClosedOrdersAsync(string symbol, int? page = null, int? limit = null, CancellationToken ct = default);
 
         /// <summary>
         /// Retrieves details of an order. Requires API credentials
@@ -96,7 +96,7 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
         /// <param name="limit">The number of results per page</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>Details of an executed order</returns>
-        Task<WebCallResult<CoinExPagedResult<CoinExOrderTrade>>> GetOrderTradesAsync(long orderId, int page, int limit, CancellationToken ct = default);
+        Task<WebCallResult<CoinExPagedResult<CoinExOrderTrade>>> GetOrderTradesAsync(long orderId, int? page = null, int? limit = null, CancellationToken ct = default);
 
         /// <summary>
         /// Gets a list of trades you executed on a specific symbol. Requires API credentials
@@ -107,7 +107,7 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
         /// <param name="limit">The number of results per page</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>List of trades for a symbol</returns>
-        Task<WebCallResult<CoinExPagedResult<CoinExOrderTradeExtended>>> GetUserTradesAsync(string symbol, int page, int limit, CancellationToken ct = default);
+        Task<WebCallResult<CoinExPagedResult<CoinExOrderTradeExtended>>> GetUserTradesAsync(string symbol, int? page = null, int? limit = null, CancellationToken ct = default);
 
         /// <summary>
         /// Cancels an order. Requires API credentials

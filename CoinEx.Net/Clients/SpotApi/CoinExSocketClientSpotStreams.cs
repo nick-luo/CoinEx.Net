@@ -80,7 +80,7 @@ namespace CoinEx.Net.Clients.SpotApi
         }
 
         /// <inheritdoc />
-        public async Task<CallResult<CoinExSocketSymbolState>> GetSymbolStateAsync(string symbol, int cyclePeriod)
+        public async Task<CallResult<CoinExSocketSymbolState>> GetTickerAsync(string symbol, int cyclePeriod)
         {
             symbol.ValidateCoinExSymbol();
             return await _baseClient.QueryInternalAsync<CoinExSocketSymbolState>(this, new CoinExSocketRequest(_baseClient.NextIdInternal(), StateSubject, QueryAction, symbol, cyclePeriod), false).ConfigureAwait(false);
@@ -127,7 +127,7 @@ namespace CoinEx.Net.Clients.SpotApi
         }
 
         /// <inheritdoc />
-        public async Task<CallResult<UpdateSubscription>> SubscribeToSymbolStateUpdatesAsync(string symbol, Action<DataEvent<CoinExSocketSymbolState>> onMessage, CancellationToken ct = default)
+        public async Task<CallResult<UpdateSubscription>> SubscribeToTickerUpdatesAsync(string symbol, Action<DataEvent<CoinExSocketSymbolState>> onMessage, CancellationToken ct = default)
         {
             symbol.ValidateCoinExSymbol();
             var internalHandler = new Action<DataEvent<JToken[]>>(data =>
@@ -148,7 +148,7 @@ namespace CoinEx.Net.Clients.SpotApi
         }
 
         /// <inheritdoc />
-        public async Task<CallResult<UpdateSubscription>> SubscribeToSymbolStateUpdatesAsync(Action<DataEvent<IEnumerable<CoinExSocketSymbolState>>> onMessage, CancellationToken ct = default)
+        public async Task<CallResult<UpdateSubscription>> SubscribeToAllTickerUpdatesAsync(Action<DataEvent<IEnumerable<CoinExSocketSymbolState>>> onMessage, CancellationToken ct = default)
         {
             var internalHandler = new Action<DataEvent<JToken[]>>(data =>
             {
@@ -278,6 +278,10 @@ namespace CoinEx.Net.Clients.SpotApi
 
             return await _baseClient.SubscribeInternalAsync(this, new CoinExSocketRequest(_baseClient.NextIdInternal(), BalanceSubject, SubscribeAction), null, true, internalHandler, ct).ConfigureAwait(false);
         }
+
+        /// <inheritdoc />
+        public Task<CallResult<UpdateSubscription>> SubscribeToOrderUpdatesAsync(Action<DataEvent<CoinExSocketOrderUpdate>> onMessage, CancellationToken ct = default)
+            => SubscribeToOrderUpdatesAsync(new string[0], onMessage, ct);
 
         /// <inheritdoc />
         public async Task<CallResult<UpdateSubscription>> SubscribeToOrderUpdatesAsync(IEnumerable<string> symbols, Action<DataEvent<CoinExSocketOrderUpdate>> onMessage, CancellationToken ct = default)

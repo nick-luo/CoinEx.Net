@@ -30,32 +30,32 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
         Task<CallResult<DateTime>> GetServerTimeAsync();
 
         /// <summary>
-        /// Get the symbol state
+        /// Get the symbol ticker
         /// <para><a href="https://github.com/coinexcom/coinex_exchange_api/wiki/053state" /></para>
         /// </summary>
         /// <param name="symbol">The symbol to get the state for</param>
         /// <param name="cyclePeriod">The period to get data over, specified in seconds. i.e. one minute = 60, one day = 86400</param>
         /// <returns>Symbol state</returns>
-        Task<CallResult<CoinExSocketSymbolState>> GetSymbolStateAsync(string symbol, int cyclePeriod);
+        Task<CallResult<CoinExSocketSymbolState>> GetTickerAsync(string symbol, int cyclePeriod);
 
         /// <summary>
-        /// Subscribe to symbol state updates for a specific symbol
+        /// Subscribe to symbol ticker updates for a specific symbol
         /// <para><a href="https://github.com/coinexcom/coinex_exchange_api/wiki/053state" /></para>
         /// </summary>
         /// <param name="symbol">Symbol to receive updates for</param>
         /// <param name="onMessage">Data handler</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
         /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
-        Task<CallResult<UpdateSubscription>> SubscribeToSymbolStateUpdatesAsync(string symbol, Action<DataEvent<CoinExSocketSymbolState>> onMessage, CancellationToken ct = default);
+        Task<CallResult<UpdateSubscription>> SubscribeToTickerUpdatesAsync(string symbol, Action<DataEvent<CoinExSocketSymbolState>> onMessage, CancellationToken ct = default);
 
         /// <summary>
-        /// Subscribe to symbol state updates for all symbols
+        /// Subscribe to ticker updates for all symbols
         /// <para><a href="https://github.com/coinexcom/coinex_exchange_api/wiki/053state" /></para>
         /// </summary>
         /// <param name="onMessage">Data handler</param>
         /// <param name="ct">Cancellation token for closing this subscription</param>
         /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
-        Task<CallResult<UpdateSubscription>> SubscribeToSymbolStateUpdatesAsync(Action<DataEvent<IEnumerable<CoinExSocketSymbolState>>> onMessage, CancellationToken ct = default);
+        Task<CallResult<UpdateSubscription>> SubscribeToAllTickerUpdatesAsync(Action<DataEvent<IEnumerable<CoinExSocketSymbolState>>> onMessage, CancellationToken ct = default);
 
         /// <summary>
         /// Get an order book
@@ -147,6 +147,15 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
         /// <param name="limit">The limit of results</param>
         /// <returns>List of open orders</returns>
         Task<CallResult<CoinExSocketPagedResult<CoinExSocketOrder>>> GetOpenOrdersAsync(string symbol, OrderSide side, int offset, int limit);
+
+        /// <summary>
+        /// Subscribe to updates of active orders. Receives updates whenever an order is placed, updated or finished
+        /// <para><a href="https://github.com/coinexcom/coinex_exchange_api/wiki/052order" /></para>
+        /// </summary>
+        /// <param name="onMessage">Data handler</param>
+        /// <param name="ct">Cancellation token for closing this subscription</param>
+        /// <returns>A stream subscription. This stream subscription can be used to be notified when the socket is disconnected/reconnected</returns>
+        Task<CallResult<UpdateSubscription>> SubscribeToOrderUpdatesAsync(Action<DataEvent<CoinExSocketOrderUpdate>> onMessage, CancellationToken ct = default);
 
         /// <summary>
         /// Subscribe to updates of active orders. Receives updates whenever an order is placed, updated or finished
