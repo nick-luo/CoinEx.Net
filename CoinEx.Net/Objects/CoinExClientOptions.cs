@@ -141,11 +141,11 @@ namespace CoinEx.Net.Objects
         /// <summary>
         /// The client to use for the socket connection. When using the same client for multiple order books the connection can be shared.
         /// </summary>
-        public ICoinExSocketClient? SocketClient { get; }
+        public ICoinExSocketClient? SocketClient { get; set; }
 
         /// <summary>
         /// The amount of rows. Should be one of: 5/10/20/50
         /// </summary>
-        public int? Limit { get; }
+        public int? Limit { get; set; }
     }
 }
