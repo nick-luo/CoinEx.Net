@@ -21,7 +21,7 @@ namespace CoinEx.Net.Objects
         /// </summary>
         public INonceProvider? NonceProvider { get; set; }
 
-        private RestApiClientOptions _spotApiOptions = new RestApiClientOptions("https://api.coinex.com/v1")
+        private readonly RestApiClientOptions _spotApiOptions = new RestApiClientOptions("https://api.coinex.com/v1")
         {
             RateLimiters = new List<IRateLimiter>
                 {
@@ -97,7 +97,7 @@ namespace CoinEx.Net.Objects
             }
         }
 
-        private ApiClientOptions _spotStreamsOptions = new ApiClientOptions("wss://socket.coinex.com/");
+        private readonly ApiClientOptions _spotStreamsOptions = new ApiClientOptions("wss://socket.coinex.com/");
         /// <summary>
         /// Spot stream options
         /// </summary>

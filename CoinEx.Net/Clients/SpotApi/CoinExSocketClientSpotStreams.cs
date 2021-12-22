@@ -281,7 +281,7 @@ namespace CoinEx.Net.Clients.SpotApi
 
         /// <inheritdoc />
         public Task<CallResult<UpdateSubscription>> SubscribeToOrderUpdatesAsync(Action<DataEvent<CoinExSocketOrderUpdate>> onMessage, CancellationToken ct = default)
-            => SubscribeToOrderUpdatesAsync(new string[0], onMessage, ct);
+            => SubscribeToOrderUpdatesAsync(Array.Empty<string>(), onMessage, ct);
 
         /// <inheritdoc />
         public async Task<CallResult<UpdateSubscription>> SubscribeToOrderUpdatesAsync(IEnumerable<string> symbols, Action<DataEvent<CoinExSocketOrderUpdate>> onMessage, CancellationToken ct = default)
