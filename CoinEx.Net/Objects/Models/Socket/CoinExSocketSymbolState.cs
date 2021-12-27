@@ -23,19 +23,19 @@ namespace CoinEx.Net.Objects.Models.Socket
         /// The highest symbol price in the period
         /// </summary>
         [JsonConverter(typeof(DecimalConverter))]
-        [JsonProperty("open")]
+        [JsonProperty("high")]
         public decimal HighPrice { get; set; }
         /// <summary>
         /// The last symbol trade in the period
         /// </summary>
         [JsonConverter(typeof(DecimalConverter))]
-        [JsonProperty("open")]
+        [JsonProperty("last")]
         public decimal LastPrice { get; set; }
         /// <summary>
         /// The lowest symbol price in the period
         /// </summary>
         [JsonConverter(typeof(DecimalConverter))]
-        [JsonProperty("open")]
+        [JsonProperty("low")]
         public decimal LowPrice { get; set; }
         /// <summary>
         /// The open price of the period

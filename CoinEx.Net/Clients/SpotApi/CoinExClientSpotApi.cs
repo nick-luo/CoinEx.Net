@@ -38,6 +38,9 @@ namespace CoinEx.Net.Clients.SpotApi
         public event Action<ICommonOrderId>? OnOrderCanceled;
         #endregion
 
+        /// <inheritdoc />
+        public string ExchangeName => "CoinEx";
+
         #region Api clients
         /// <inheritdoc />
         public ICoinExClientSpotApiAccount Account { get; }
@@ -237,5 +240,8 @@ namespace CoinEx.Net.Clients.SpotApi
         /// <inheritdoc />
         public override TimeSpan GetTimeOffset()
             => TimeSyncState.TimeOffset;
+
+        /// <inheritdoc />
+        public IExchangeClient AsExchangeClient() => this;
     }
 }
