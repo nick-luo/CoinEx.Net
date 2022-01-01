@@ -1,4 +1,8 @@
-﻿using CoinEx.Net.Enums;
+﻿using CoinEx.Net.Clients;
+using CoinEx.Net.Enums;
+using CoinEx.Net.Interfaces.Clients;
+using CoinEx.Net.Objects;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Text.RegularExpressions;
 
@@ -9,6 +13,28 @@ namespace CoinEx.Net
     /// </summary>
     public static class CoinExHelpers
     {
+        /// <summary>
+        /// Add the ICoinExClient and ICoinExSocketClient to the sevice collection so they can be injected
+        /// </summary>
+        /// <param name="services">The service collection</param>
+        /// <param name="defaultOptionsCallback">Set default options for the client</param>
+        /// <returns></returns>
+        public static IServiceCollection AddBybit(this IServiceCollection services, Action<CoinExClientOptions, CoinExSocketClientOptions>? defaultOptionsCallback = null)
+        {
+            if (defaultOptionsCallback != null)
+            {
+                var options = new CoinExClientOptions();
+                var socketOptions = new CoinExSocketClientOptions();
+                defaultOptionsCallback?.Invoke(options, socketOptions);
+
+                CoinExClient.SetDefaultOptions(options);
+                CoinExSocketClient.SetDefaultOptions(socketOptions);
+            }
+
+            return services.AddTransient<ICoinExClient, CoinExClient>()
+                           .AddScoped<ICoinExSocketClient, CoinExSocketClient>();
+        }
+
         /// <summary>
         /// Kline interval to seconds
         /// </summary>
@@ -63,7 +89,7 @@ namespace CoinEx.Net
                 throw new ArgumentException("Symbol is not provided");
 
             if (!Regex.IsMatch(symbolString, "^([0-9A-Z]{5,})$"))
-                throw new ArgumentException($"{symbolString} is not a valid CoinEx symbol. Should be [QuoteAsset][BaseAsset], e.g. ETHBTC");
+                throw new ArgumentException($"{symbolString} is not a valid CoinEx symbol. Should be [BaseAsset][QuoteAsset], e.g. ETHBTC");
         }
     }
 }

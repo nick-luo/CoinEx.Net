@@ -8,18 +8,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Authentication;
-using CryptoExchange.Net.ExchangeInterfaces;
 using CoinEx.Net.Enums;
 using CoinEx.Net.Objects.Internal;
 using CoinEx.Net.Objects.Models;
 using CoinEx.Net.Interfaces.Clients.SpotApi;
 using CryptoExchange.Net.Logging;
 using Microsoft.Extensions.Logging;
+using CryptoExchange.Net.Interfaces;
+using CryptoExchange.Net.ComonObjects;
+using System.Globalization;
 
 namespace CoinEx.Net.Clients.SpotApi
 {
     /// <inheritdoc cref="ICoinExClientSpotApi" />
-    public class CoinExClientSpotApi : RestApiClient, ICoinExClientSpotApi, IExchangeClient
+    public class CoinExClientSpotApi : RestApiClient, ICoinExClientSpotApi, ISpotClient
     {
         #region fields
         private readonly CoinExClient _baseClient;
@@ -31,11 +33,11 @@ namespace CoinEx.Net.Clients.SpotApi
         /// <summary>
         /// Event triggered when an order is placed via this client
         /// </summary>
-        public event Action<ICommonOrderId>? OnOrderPlaced;
+        public event Action<OrderId>? OnOrderPlaced;
         /// <summary>
         /// Event triggered when an order is canceled via this client. Note that this does not trigger when using CancelAllOrdersAsync
         /// </summary>
-        public event Action<ICommonOrderId>? OnOrderCanceled;
+        public event Action<OrderId>? OnOrderCanceled;
         #endregion
 
         /// <inheritdoc />
@@ -83,12 +85,12 @@ namespace CoinEx.Net.Clients.SpotApi
             return new Uri(BaseAddress.AppendPath(endpoint));
         }
 
-        internal void InvokeOrderPlaced(ICommonOrderId id)
+        internal void InvokeOrderPlaced(OrderId id)
         {
             OnOrderPlaced?.Invoke(id);
         }
 
-        internal void InvokeOrderCanceled(ICommonOrderId id)
+        internal void InvokeOrderCanceled(OrderId id)
         {
             OnOrderCanceled?.Invoke(id);
         }
@@ -106,106 +108,278 @@ namespace CoinEx.Net.Clients.SpotApi
         /// <returns></returns>
         public string GetSymbolName(string baseAsset, string quoteAsset) => (baseAsset + quoteAsset).ToUpperInvariant();
 #pragma warning disable 1066
-        async Task<WebCallResult<IEnumerable<ICommonSymbol>>> IExchangeClient.GetSymbolsAsync()
+        async Task<WebCallResult<IEnumerable<Symbol>>> IBaseRestClient.GetSymbolsAsync()
         {
             var symbols = await ExchangeData.GetSymbolInfoAsync().ConfigureAwait(false);
-            return symbols.As<IEnumerable<ICommonSymbol>>(symbols.Data?.Select(d => d.Value));
+            if (!symbols)
+                return symbols.As<IEnumerable<Symbol>>(null);
+
+            return symbols.As(symbols.Data.Select(d => new Symbol
+            {
+                SourceObject = d,
+                Name = d.Key,
+                MinTradeQuantity = d.Value.MinQuantity,
+                PriceDecimals = d.Value.PricingDecimal,
+                QuantityDecimals = d.Value.TradingDecimal
+            }));
         }
 
-        async Task<WebCallResult<ICommonTicker>> IExchangeClient.GetTickerAsync(string symbol)
+        async Task<WebCallResult<Ticker>> IBaseRestClient.GetTickerAsync(string symbol)
         {
+            if (string.IsNullOrEmpty(symbol))
+                throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetTickerAsync), nameof(symbol));
+
             var tickers = await ExchangeData.GetTickerAsync(symbol).ConfigureAwait(false);
-            return tickers.As<ICommonTicker>(tickers.Data?.Ticker);
+            if (!tickers)
+                return tickers.As<Ticker>(null);
+
+            return tickers.As(new Ticker
+            {
+                SourceObject = tickers.Data,
+                Symbol = symbol,
+                HighPrice = tickers.Data.Ticker.HighPrice,
+                LowPrice = tickers.Data.Ticker.LowPrice,
+                LastPrice = tickers.Data.Ticker.LastPrice,
+                Price24H = tickers.Data.Ticker.OpenPrice,
+                Volume = tickers.Data.Ticker.Volume
+            });
         }
 
-        async Task<WebCallResult<IEnumerable<ICommonTicker>>> IExchangeClient.GetTickersAsync()
+        async Task<WebCallResult<IEnumerable<Ticker>>> IBaseRestClient.GetTickersAsync()
         {
             var tickers = await ExchangeData.GetTickersAsync().ConfigureAwait(false);
-            return tickers.As<IEnumerable<ICommonTicker>>(tickers.Data?.Tickers.Select(d => d.Value));
+            if (!tickers)
+                return tickers.As<IEnumerable<Ticker>>(null);
+
+            return tickers.As(tickers.Data.Tickers.Select(t =>
+                new Ticker
+                {
+                    SourceObject = t,
+                    Symbol = t.Key,
+                    HighPrice = t.Value.HighPrice,
+                    LowPrice = t.Value.LowPrice,
+                    LastPrice = t.Value.LastPrice,
+                    Price24H = t.Value.OpenPrice,
+                    Volume = t.Value.Volume
+                }));
         }
 
-        async Task<WebCallResult<IEnumerable<ICommonKline>>> IExchangeClient.GetKlinesAsync(string symbol, TimeSpan timespan, DateTime? startTime = null, DateTime? endTime = null, int? limit = null)
+        async Task<WebCallResult<IEnumerable<Kline>>> IBaseRestClient.GetKlinesAsync(string symbol, TimeSpan timespan, DateTime? startTime = null, DateTime? endTime = null, int? limit = null)
         {
             if (startTime != null || endTime != null)
-                return WebCallResult<IEnumerable<ICommonKline>>.CreateErrorResult(new ArgumentError($"CoinEx does not support the {nameof(startTime)}/{nameof(endTime)} parameters for the method {nameof(IExchangeClient.GetKlinesAsync)}"));
+                throw new ArgumentException("CoinEx does not support time based klines requesting", startTime != null ? nameof(startTime) : nameof(endTime));
+
+            if (string.IsNullOrEmpty(symbol))
+                throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetKlinesAsync), nameof(symbol));
 
             var klines = await ExchangeData.GetKlinesAsync(symbol, GetKlineIntervalFromTimespan(timespan), limit).ConfigureAwait(false);
-            return klines.As<IEnumerable<ICommonKline>>(klines.Data);
+            if (!klines)
+                return klines.As<IEnumerable<Kline>>(null);
+
+            return klines.As(klines.Data.Select(t =>
+                new Kline
+                {
+                    SourceObject = t,
+                    OpenPrice = t.OpenPrice,
+                    LowPrice = t.LowPrice,
+                    OpenTime = t.OpenTime,
+                    Volume = t.Volume,
+                    ClosePrice = t.ClosePrice,
+                    HighPrice = t.HighPrice
+                }));
         }
 
-        async Task<WebCallResult<ICommonOrderBook>> IExchangeClient.GetOrderBookAsync(string symbol)
+        async Task<WebCallResult<OrderBook>> IBaseRestClient.GetOrderBookAsync(string symbol)
         {
+            if (string.IsNullOrEmpty(symbol))
+                throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetOrderBookAsync), nameof(symbol));
+
             var book = await ExchangeData.GetOrderBookAsync(symbol, 0).ConfigureAwait(false);
-            return book.As<ICommonOrderBook>(book.Data);
+            if (!book)
+                return book.As<OrderBook>(null);
+
+            return book.As(new OrderBook
+            {
+                SourceObject = book.Data,
+                Asks = book.Data.Asks.Select(a => new OrderBookEntry { Price = a.Price, Quantity = a.Quantity }),
+                Bids = book.Data.Bids.Select(b => new OrderBookEntry { Price = b.Price, Quantity = b.Quantity })
+            });
         }
 
-        async Task<WebCallResult<IEnumerable<ICommonRecentTrade>>> IExchangeClient.GetRecentTradesAsync(string symbol)
+        async Task<WebCallResult<IEnumerable<Trade>>> IBaseRestClient.GetRecentTradesAsync(string symbol)
         {
+            if (string.IsNullOrEmpty(symbol))
+                throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetRecentTradesAsync), nameof(symbol));
+
             var trades = await ExchangeData.GetTradeHistoryAsync(symbol).ConfigureAwait(false);
-            return trades.As<IEnumerable<ICommonRecentTrade>>(trades.Data);
+            if (!trades)
+                return trades.As<IEnumerable<Trade>>(null);
+
+            return trades.As(trades.Data.Select(t =>
+                new Trade
+                {
+                    SourceObject = t,
+                    Price = t.Price,
+                    Quantity = t.Quantity,
+                    Symbol = symbol,
+                    Timestamp = t.Timestamp
+                }));
         }
 
-        async Task<WebCallResult<ICommonOrderId>> IExchangeClient.PlaceOrderAsync(string symbol, IExchangeClient.OrderSide side, IExchangeClient.OrderType type, decimal quantity, decimal? price = null, string? accountId = null)
+        async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CryptoExchange.Net.ComonObjects.OrderSide side, CryptoExchange.Net.ComonObjects.OrderType type, decimal quantity, decimal? price = null, string? accountId = null)
         {
-            if (price == null && type == IExchangeClient.OrderType.Limit)
-                return WebCallResult<ICommonOrderId>.CreateErrorResult(new ArgumentError("Price parameter null while placing a limit order"));
+            if (price == null && type == CryptoExchange.Net.ComonObjects.OrderType.Limit)
+                throw new ArgumentException("Price parameter null while placing a limit order", nameof(price));
+
+            if (string.IsNullOrEmpty(symbol))
+                throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.PlaceOrderAsync), nameof(symbol));
 
             var result = await Trading.PlaceOrderAsync(
                 symbol,
-                side == IExchangeClient.OrderSide.Sell ? OrderSide.Sell : OrderSide.Buy,
-                type == IExchangeClient.OrderType.Limit ? OrderType.Limit : OrderType.Market,
+                side == CryptoExchange.Net.ComonObjects.OrderSide.Sell ? Enums.OrderSide.Sell : Enums.OrderSide.Buy,
+                type == CryptoExchange.Net.ComonObjects.OrderType.Limit ? Enums.OrderType.Limit : Enums.OrderType.Market,
                 quantity,
                 price).ConfigureAwait(false);
+            if (!result)
+                return result.As<OrderId>(null);
 
-            return result.As<ICommonOrderId>(result.Data);
+            return result.As(new OrderId { SourceObject = result.Data, Id = result.Data.Id.ToString(CultureInfo.InvariantCulture) });
         }
 
-        async Task<WebCallResult<ICommonOrder>> IExchangeClient.GetOrderAsync(string orderId, string? symbol = null)
+        async Task<WebCallResult<Order>> IBaseRestClient.GetOrderAsync(string orderId, string? symbol = null)
         {
             if (string.IsNullOrEmpty(symbol))
-                return WebCallResult<ICommonOrder>.CreateErrorResult(new ArgumentError($"CoinEx needs the {nameof(symbol)} parameter for the method {nameof(IExchangeClient.GetOrderAsync)}"));
+                throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetOrderAsync), nameof(symbol));
 
-            var order = await Trading.GetOrderAsync(symbol!, long.Parse(orderId)).ConfigureAwait(false);
-            return order.As<ICommonOrder>(order.Data);
+            if (!long.TryParse(orderId, out var id))
+                throw new ArgumentException($"Invalid order id for CoinEx {nameof(ISpotClient.GetOrderAsync)}", nameof(orderId));
+
+            var order = await Trading.GetOrderAsync(symbol!, id).ConfigureAwait(false);
+            if (!order)
+                return order.As<Order>(null);
+
+            return order.As(new Order
+            {
+                SourceObject = order.Data,
+                Id = order.Data.Id.ToString(CultureInfo.InvariantCulture),
+                Price = order.Data.Price,
+                Quantity = order.Data.Quantity,
+                QuantityFilled = order.Data.QuantityFilled,
+                Timestamp = order.Data.CreateTime,
+                Symbol = order.Data.Symbol,
+                Side = order.Data.Side == Enums.OrderSide.Buy ? CryptoExchange.Net.ComonObjects.OrderSide.Buy: CryptoExchange.Net.ComonObjects.OrderSide.Sell,
+                Status = order.Data.Status == Enums.OrderStatus.Canceled ? CryptoExchange.Net.ComonObjects.OrderStatus.Canceled: order.Data.Status == Enums.OrderStatus.Executed ? CryptoExchange.Net.ComonObjects.OrderStatus.Filled: CryptoExchange.Net.ComonObjects.OrderStatus.Active,
+                Type = order.Data.OrderType == Enums.OrderType.Market ? CryptoExchange.Net.ComonObjects.OrderType.Market: order.Data.OrderType == Enums.OrderType.Limit ? CryptoExchange.Net.ComonObjects.OrderType.Limit: CryptoExchange.Net.ComonObjects.OrderType.Other
+            });
         }
 
-        async Task<WebCallResult<IEnumerable<ICommonTrade>>> IExchangeClient.GetTradesAsync(string orderId, string? symbol = null)
+        async Task<WebCallResult<IEnumerable<UserTrade>>> IBaseRestClient.GetOrderTradesAsync(string orderId, string? symbol = null)
         {
-            var result = await Trading.GetOrderTradesAsync(long.Parse(orderId), 1, 100).ConfigureAwait(false);
-            return result.As<IEnumerable<ICommonTrade>>(result.Data?.Data);
+            if (!long.TryParse(orderId, out var id))
+                throw new ArgumentException($"Invalid order id for CoinEx {nameof(ISpotClient.GetOrderAsync)}", nameof(orderId));
+
+            var result = await Trading.GetOrderTradesAsync(id, 1, 100).ConfigureAwait(false);
+            if (!result)
+                return result.As<IEnumerable<UserTrade>>(null);
+
+            return result.As(result.Data.Data.Select(d =>
+                new UserTrade
+                {
+                    SourceObject = d,
+                    Id = d.Id.ToString(CultureInfo.InvariantCulture),
+                    Price = d.Price,
+                    Quantity = d.Quantity,
+                    Fee = d.Fee,
+                    FeeAsset = d.FeeAsset,
+                    OrderId = d.OrderId?.ToString(CultureInfo.InvariantCulture),
+                    Symbol = symbol ?? String.Empty,
+                    Timestamp = d.Timestamp
+                }));
         }
 
-        async Task<WebCallResult<IEnumerable<ICommonOrder>>> IExchangeClient.GetOpenOrdersAsync(string? symbol)
+        async Task<WebCallResult<IEnumerable<Order>>> IBaseRestClient.GetOpenOrdersAsync(string? symbol)
         {
             if (string.IsNullOrEmpty(symbol))
-                throw new ArgumentException($"CoinEx needs the {nameof(symbol)} parameter for the method {nameof(IExchangeClient.GetOpenOrdersAsync)}");
+                throw new ArgumentException($"CoinEx needs the {nameof(symbol)} parameter for the method {nameof(ISpotClient.GetOpenOrdersAsync)}");
 
             var openOrders = await Trading.GetOpenOrdersAsync(symbol!, 1, 100).ConfigureAwait(false);
-            return openOrders.As<IEnumerable<ICommonOrder>>(openOrders.Data?.Data);
+            if (!openOrders)
+                return openOrders.As<IEnumerable<Order>>(null);
+
+            return openOrders.As(openOrders.Data.Data.Select(o => new Order
+            {
+                SourceObject = o,
+                Id = o.Id.ToString(CultureInfo.InvariantCulture),
+                Price = o.Price,
+                Quantity = o.Quantity,
+                QuantityFilled = o.QuantityFilled,
+                Timestamp = o.CreateTime,
+                Symbol = o.Symbol,
+                Side = o.Side == Enums.OrderSide.Buy ? CryptoExchange.Net.ComonObjects.OrderSide.Buy : CryptoExchange.Net.ComonObjects.OrderSide.Sell,
+                Status = o.Status == Enums.OrderStatus.Canceled ? CryptoExchange.Net.ComonObjects.OrderStatus.Canceled : o.Status == Enums.OrderStatus.Executed ? CryptoExchange.Net.ComonObjects.OrderStatus.Filled : CryptoExchange.Net.ComonObjects.OrderStatus.Active,
+                Type = o.OrderType == Enums.OrderType.Market ? CryptoExchange.Net.ComonObjects.OrderType.Market : o.OrderType == Enums.OrderType.Limit ? CryptoExchange.Net.ComonObjects.OrderType.Limit : CryptoExchange.Net.ComonObjects.OrderType.Other
+            }));
         }
 
-        async Task<WebCallResult<IEnumerable<ICommonOrder>>> IExchangeClient.GetClosedOrdersAsync(string? symbol)
+        async Task<WebCallResult<IEnumerable<Order>>> IBaseRestClient.GetClosedOrdersAsync(string? symbol)
         {
             if (string.IsNullOrEmpty(symbol))
-                throw new ArgumentException($"CoinEx needs the {nameof(symbol)} parameter for the method {nameof(IExchangeClient.GetClosedOrdersAsync)}");
+                throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetClosedOrdersAsync), nameof(symbol));
+
+            if (string.IsNullOrEmpty(symbol))
+                throw new ArgumentException($"CoinEx needs the {nameof(symbol)} parameter for the method {nameof(ISpotClient.GetClosedOrdersAsync)}");
 
             var result = await Trading.GetClosedOrdersAsync(symbol!, 1, 100).ConfigureAwait(false);
-            return result.As<IEnumerable<ICommonOrder>>(result.Data?.Data);
+            if (!result)
+                return result.As<IEnumerable<Order>>(null);
+
+            return result.As(result.Data.Data.Select(o => new Order
+            {
+                SourceObject = o,
+                Id = o.Id.ToString(CultureInfo.InvariantCulture),
+                Price = o.Price,
+                Quantity = o.Quantity,
+                QuantityFilled = o.QuantityFilled,
+                Timestamp = o.CreateTime,
+                Symbol = o.Symbol,
+                Side = o.Side == Enums.OrderSide.Buy ? CryptoExchange.Net.ComonObjects.OrderSide.Buy : CryptoExchange.Net.ComonObjects.OrderSide.Sell,
+                Status = o.Status == Enums.OrderStatus.Canceled ? CryptoExchange.Net.ComonObjects.OrderStatus.Canceled : o.Status == Enums.OrderStatus.Executed ? CryptoExchange.Net.ComonObjects.OrderStatus.Filled : CryptoExchange.Net.ComonObjects.OrderStatus.Active,
+                Type = o.OrderType == Enums.OrderType.Market ? CryptoExchange.Net.ComonObjects.OrderType.Market : o.OrderType == Enums.OrderType.Limit ? CryptoExchange.Net.ComonObjects.OrderType.Limit : CryptoExchange.Net.ComonObjects.OrderType.Other
+            }));
         }
 
-        async Task<WebCallResult<ICommonOrderId>> IExchangeClient.CancelOrderAsync(string orderId, string? symbol)
+        async Task<WebCallResult<OrderId>> IBaseRestClient.CancelOrderAsync(string orderId, string? symbol)
         {
-            if (symbol == null)
-                return WebCallResult<ICommonOrderId>.CreateErrorResult(new ArgumentError(nameof(symbol) + " required for CoinEx " + nameof(IExchangeClient.CancelOrderAsync)));
+            if (string.IsNullOrEmpty(symbol))
+                throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.CancelOrderAsync), nameof(symbol));
 
-            var result = await Trading.CancelOrderAsync(symbol, long.Parse(orderId)).ConfigureAwait(false);
-            return result.As<ICommonOrderId>(result.Data);
+            if (!long.TryParse(orderId, out var id))
+                throw new ArgumentException($"Invalid order id for CoinEx {nameof(ISpotClient.GetOrderAsync)}", nameof(orderId));
+
+            var result = await Trading.CancelOrderAsync(symbol!, id).ConfigureAwait(false);
+            if (!result)
+                return result.As<OrderId>(null);
+
+            return result.As(new OrderId
+            {
+                SourceObject = result.Data,
+                Id = result.Data.Id.ToString(CultureInfo.InvariantCulture)
+            });
         }
 
-        async Task<WebCallResult<IEnumerable<ICommonBalance>>> IExchangeClient.GetBalancesAsync(string? accountId = null)
+        async Task<WebCallResult<IEnumerable<Balance>>> IBaseRestClient.GetBalancesAsync(string? accountId = null)
         {
             var balances = await Account.GetBalancesAsync().ConfigureAwait(false);
-            return balances.As<IEnumerable<ICommonBalance>>(balances.Data?.Select(d => d.Value));
+            if (!balances)
+                return balances.As<IEnumerable<Balance>>(null);
+
+            return balances.As(balances.Data.Select(d => new Balance
+            {
+                SourceObject = d,
+                Asset = d.Key,
+                Available = d.Value.Available,
+                Total = d.Value.Frozen + d.Value.Available
+            }));
         }
 #pragma warning restore 1066
 
@@ -242,6 +416,6 @@ namespace CoinEx.Net.Clients.SpotApi
             => TimeSyncState.TimeOffset;
 
         /// <inheritdoc />
-        public IExchangeClient AsExchangeClient() => this;
+        public ISpotClient ComonSpotClient => this;
     }
 }

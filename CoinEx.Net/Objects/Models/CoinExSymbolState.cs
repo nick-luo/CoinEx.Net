@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using CoinEx.Net.Converters;
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.ExchangeInterfaces;
 using Newtonsoft.Json;
 
 namespace CoinEx.Net.Objects.Models
@@ -44,7 +43,7 @@ namespace CoinEx.Net.Objects.Models
     /// <summary>
     /// Symbol state data
     /// </summary>
-    public class CoinExSymbolStateData: ICommonTicker
+    public class CoinExSymbolStateData
     {
         /// <summary>
         /// Symbol
@@ -99,10 +98,5 @@ namespace CoinEx.Net.Objects.Models
         /// </summary>
         [JsonProperty("vol"), JsonConverter(typeof(DecimalConverter))]
         public decimal Volume { get; set; }
-
-        string ICommonTicker.CommonSymbol => Symbol;
-        decimal ICommonTicker.CommonHighPrice => HighPrice;
-        decimal ICommonTicker.CommonLowPrice => LowPrice;
-        decimal ICommonTicker.CommonVolume => Volume;
     }
 }

@@ -2,7 +2,6 @@
 using CoinEx.Net.Converters;
 using CoinEx.Net.Enums;
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.ExchangeInterfaces;
 using Newtonsoft.Json;
 
 namespace CoinEx.Net.Objects.Models
@@ -10,7 +9,7 @@ namespace CoinEx.Net.Objects.Models
     /// <summary>
     /// Symbol trade info
     /// </summary>
-    public class CoinExSymbolTrade: ICommonRecentTrade
+    public class CoinExSymbolTrade
     {
         /// <summary>
         /// The quantity of the transaction
@@ -38,9 +37,5 @@ namespace CoinEx.Net.Objects.Models
         [JsonConverter(typeof(OrderSideConverter))]
         [JsonProperty("type")]
         public OrderSide Side { get; set; }
-
-        decimal ICommonRecentTrade.CommonPrice => Price;
-        decimal ICommonRecentTrade.CommonQuantity => Quantity;
-        DateTime ICommonRecentTrade.CommonTradeTime => Timestamp;
     }
 }

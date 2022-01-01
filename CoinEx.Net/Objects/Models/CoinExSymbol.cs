@@ -1,5 +1,4 @@
 ﻿using CoinEx.Net.Converters;
-using CryptoExchange.Net.ExchangeInterfaces;
 using Newtonsoft.Json;
 
 namespace CoinEx.Net.Objects.Models
@@ -7,7 +6,7 @@ namespace CoinEx.Net.Objects.Models
     /// <summary>
     /// Symbol Info
     /// </summary>
-    public class CoinExSymbol: ICommonSymbol
+    public class CoinExSymbol
     {
         /// <summary>
         /// The name of the symbol
@@ -61,8 +60,5 @@ namespace CoinEx.Net.Objects.Models
         [JsonProperty("trading_decimal")]
         //[JsonConverter(typeof(IntConverter))]
         public int TradingDecimal { get; set; }
-
-        string ICommonSymbol.CommonName => Name;
-        decimal ICommonSymbol.CommonMinimumTradeQuantity => MinQuantity;
     }
 }

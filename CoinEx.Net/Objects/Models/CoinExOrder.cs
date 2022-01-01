@@ -3,7 +3,6 @@ using System.Globalization;
 using CoinEx.Net.Converters;
 using CoinEx.Net.Enums;
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.ExchangeInterfaces;
 using Newtonsoft.Json;
 
 namespace CoinEx.Net.Objects.Models
@@ -11,7 +10,7 @@ namespace CoinEx.Net.Objects.Models
     /// <summary>
     /// Order info
     /// </summary>
-    public class CoinExOrder: ICommonOrderId, ICommonOrder
+    public class CoinExOrder
     {
         /// <summary>
         /// The quantity of the order
@@ -151,31 +150,5 @@ namespace CoinEx.Net.Objects.Models
         [JsonConverter(typeof(OrderSideConverter))]
         [JsonProperty("type")]
         public OrderSide Side { get; set; }
-
-        string ICommonOrderId.CommonId => Id.ToString(CultureInfo.InvariantCulture);
-        string ICommonOrder.CommonSymbol => Symbol;
-        decimal ICommonOrder.CommonPrice => Price;
-        decimal ICommonOrder.CommonQuantity => Quantity;
-        IExchangeClient.OrderStatus ICommonOrder.CommonStatus =>
-            Status == OrderStatus.Canceled ? IExchangeClient.OrderStatus.Canceled :
-            Status == OrderStatus.Executed ? IExchangeClient.OrderStatus.Filled :
-            IExchangeClient.OrderStatus.Active;
-        bool ICommonOrder.IsActive => Status == OrderStatus.UnExecuted || Status == OrderStatus.PartiallyExecuted;
-        DateTime ICommonOrder.CommonOrderTime => CreateTime;
-
-        IExchangeClient.OrderSide ICommonOrder.CommonSide => Side == OrderSide.Buy
-            ? IExchangeClient.OrderSide.Sell
-            : IExchangeClient.OrderSide.Buy;
-
-        IExchangeClient.OrderType ICommonOrder.CommonType
-        {
-            get
-            {
-                if (OrderType == OrderType.Market)
-                    return IExchangeClient.OrderType.Market;
-                else
-                    return IExchangeClient.OrderType.Limit;
-            }
-        }
     }
 }

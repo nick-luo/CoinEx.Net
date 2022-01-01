@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoinEx.Net.Objects.Models;
 using CoinEx.Net.Interfaces.Clients.SpotApi;
+using CryptoExchange.Net.ComonObjects;
 
 namespace CoinEx.Net.Clients.SpotApi
 {
@@ -41,8 +42,8 @@ namespace CoinEx.Net.Clients.SpotApi
         /// <inheritdoc />
         public async Task<WebCallResult<CoinExOrder>> PlaceOrderAsync(
             string symbol,
-            OrderSide side,
-            OrderType type,
+            Enums.OrderSide side,
+            Enums.OrderType type,
             decimal quantity,
 
             decimal? price = null,
@@ -56,18 +57,18 @@ namespace CoinEx.Net.Clients.SpotApi
             symbol.ValidateCoinExSymbol();
 
             var endpoint = "";
-            if (type == OrderType.Limit)
+            if (type == Enums.OrderType.Limit)
                 endpoint = PlaceLimitOrderEndpoint;
-            else if (type == OrderType.Market)
+            else if (type == Enums.OrderType.Market)
                 endpoint = PlaceMarketOrderEndpoint;
-            else if (type == OrderType.StopLimit)
+            else if (type == Enums.OrderType.StopLimit)
                 endpoint = PlaceStopLimitOrderEndpoint;
-            else if (type == OrderType.StopMarket)
+            else if (type == Enums.OrderType.StopMarket)
                 endpoint = PlaceStopMarketOrderEndpoint;
 
             if (immediateOrCancel == true)
             {
-                if (type != OrderType.Limit)
+                if (type != Enums.OrderType.Limit)
                     throw new ArgumentException("ImmediateOrCancel only valid for limit orders");
 
                 endpoint = PlaceImmediateOrCancelOrderEndpoint;
@@ -87,7 +88,7 @@ namespace CoinEx.Net.Clients.SpotApi
 
             var result = await _baseClient.Execute<CoinExOrder>(_baseClient.GetUrl(endpoint), HttpMethod.Post, ct, parameters, true).ConfigureAwait(false);
             if (result)
-                _baseClient.InvokeOrderPlaced(result.Data);
+                _baseClient.InvokeOrderPlaced(new OrderId { SourceObject = result.Data, Id = result.Data.Id.ToString(CultureInfo.InvariantCulture) });
 
             return result;
         }
@@ -191,7 +192,7 @@ namespace CoinEx.Net.Clients.SpotApi
 
             var result = await _baseClient.Execute<CoinExOrder>(_baseClient.GetUrl(CancelOrderEndpoint), HttpMethod.Delete, ct, parameters, true).ConfigureAwait(false);
             if (result)
-                _baseClient.InvokeOrderCanceled(result.Data);
+                _baseClient.InvokeOrderCanceled(new OrderId { SourceObject = result.Data, Id = result.Data.Id.ToString(CultureInfo.InvariantCulture) });
             return result;
         }
 
