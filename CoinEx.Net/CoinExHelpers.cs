@@ -19,7 +19,7 @@ namespace CoinEx.Net
         /// <param name="services">The service collection</param>
         /// <param name="defaultOptionsCallback">Set default options for the client</param>
         /// <returns></returns>
-        public static IServiceCollection AddBybit(this IServiceCollection services, Action<CoinExClientOptions, CoinExSocketClientOptions>? defaultOptionsCallback = null)
+        public static IServiceCollection AddCoinEx(this IServiceCollection services, Action<CoinExClientOptions, CoinExSocketClientOptions>? defaultOptionsCallback = null)
         {
             if (defaultOptionsCallback != null)
             {
