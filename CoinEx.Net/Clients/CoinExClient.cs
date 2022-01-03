@@ -12,7 +12,7 @@ using CoinEx.Net.Objects.Models;
 using CoinEx.Net.Interfaces.Clients;
 using CoinEx.Net.Interfaces.Clients.SpotApi;
 using CoinEx.Net.Clients.SpotApi;
-using CryptoExchange.Net.ComonObjects;
+using CryptoExchange.Net.CommonObjects;
 
 namespace CoinEx.Net.Clients
 {
