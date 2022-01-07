@@ -18,8 +18,12 @@ namespace CoinEx.Net
         /// </summary>
         /// <param name="services">The service collection</param>
         /// <param name="defaultOptionsCallback">Set default options for the client</param>
+        /// <param name="socketClientLifeTime">The lifetime of the ICoinExSocketClient for the service collection. Defaults to Scoped.</param>
         /// <returns></returns>
-        public static IServiceCollection AddCoinEx(this IServiceCollection services, Action<CoinExClientOptions, CoinExSocketClientOptions>? defaultOptionsCallback = null)
+        public static IServiceCollection AddCoinEx(
+            this IServiceCollection services,
+            Action<CoinExClientOptions, CoinExSocketClientOptions>? defaultOptionsCallback = null,
+            ServiceLifetime? socketClientLifeTime = null)
         {
             if (defaultOptionsCallback != null)
             {
@@ -31,8 +35,12 @@ namespace CoinEx.Net
                 CoinExSocketClient.SetDefaultOptions(socketOptions);
             }
 
-            return services.AddTransient<ICoinExClient, CoinExClient>()
-                           .AddScoped<ICoinExSocketClient, CoinExSocketClient>();
+            services.AddTransient<ICoinExClient, CoinExClient>();
+            if (socketClientLifeTime == null)
+                services.AddScoped<ICoinExSocketClient, CoinExSocketClient>();
+            else
+                services.Add(new ServiceDescriptor(typeof(ICoinExSocketClient), typeof(CoinExSocketClient), socketClientLifeTime.Value));
+            return services;
         }
 
         /// <summary>
