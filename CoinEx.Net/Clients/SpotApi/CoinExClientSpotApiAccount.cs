@@ -67,7 +67,7 @@ namespace CoinEx.Net.Clients.SpotApi
         }
 
         /// <inheritdoc />
-        public async Task<WebCallResult<CoinExWithdrawal>> WithdrawAsync(string asset, string address, bool localTransfer, decimal quantity, CancellationToken ct = default)
+        public async Task<WebCallResult<CoinExWithdrawal>> WithdrawAsync(string asset, string address, bool localTransfer, decimal quantity, string? network = null, CancellationToken ct = default)
         {
             asset.ValidateNotNull(nameof(asset));
             address.ValidateNotNull(nameof(address));
@@ -78,6 +78,7 @@ namespace CoinEx.Net.Clients.SpotApi
                 { "transfer_method", localTransfer ? "local": "onchain" },
                 { "actual_amount", quantity.ToString(CultureInfo.InvariantCulture) }
             };
+            parameters.AddOptionalParameter("smart_contract_name", network);
 
             return await _baseClient.Execute<CoinExWithdrawal>(_baseClient.GetUrl(WithdrawEndpoint), HttpMethod.Post, ct, parameters, true).ConfigureAwait(false);
         }

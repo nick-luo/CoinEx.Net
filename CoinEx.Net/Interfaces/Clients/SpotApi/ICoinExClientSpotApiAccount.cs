@@ -60,9 +60,10 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
         /// <param name="localTransfer">Is it a local transfer between users or onchain</param>
         /// <param name="address">The address to withdraw to</param>
         /// <param name="quantity">The quantity to withdraw. This is the quantity AFTER fees have been deducted. For fee rates see https://www.coinex.com/fees </param>
+        /// <param name="network">The network to use for the withdrawal</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>The withdrawal object</returns>
-        Task<WebCallResult<CoinExWithdrawal>> WithdrawAsync(string asset, string address, bool localTransfer, decimal quantity, CancellationToken ct = default);
+        Task<WebCallResult<CoinExWithdrawal>> WithdrawAsync(string asset, string address, bool localTransfer, decimal quantity, string? network = null, CancellationToken ct = default);
 
         /// <summary>
         /// Cancel a specific withdrawal. Requires API credentials and withdrawal permission on the API key
