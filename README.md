@@ -81,6 +81,9 @@ else
 For the basic client options see also the CryptoExchange.Net [docs](https://github.com/JKorf/CryptoExchange.Net#client-options). 
 
 ## Release notes
+* Version 5.0.0-beta1 - 15 Jan 2022
+    * Updated CryptoExchange.Net
+
 * Version 5.0.0-alpha7 - 14 Jan 2022
     * Added checksum validation order books
     * Added network parameter for WithdrawAsync
