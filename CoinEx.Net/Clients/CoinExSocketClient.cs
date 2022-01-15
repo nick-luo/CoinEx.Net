@@ -112,7 +112,7 @@ namespace CoinEx.Net.Clients
             var error = data["error"];
             if (error != null && error.Type != JTokenType.Null)
             {
-                callResult = new CallResult<T>(default, new ServerError(error["code"]?.Value<int>() ?? 0, error["message"]?.ToString() ?? "Unknown error"));
+                callResult = new CallResult<T>(new ServerError(error["code"]?.Value<int>() ?? 0, error["message"]?.ToString() ?? "Unknown error"));
                 return true;
             }
             else
@@ -120,18 +120,18 @@ namespace CoinEx.Net.Clients
                 var result = data["result"];
                 if (result == null)
                 {
-                    callResult = new CallResult<T>(default, new UnknownError("No data"));
+                    callResult = new CallResult<T>(new UnknownError("No data"));
                     return true;
                 }
 
                 var desResult = Deserialize<T>(result);
                 if (!desResult)
                 {
-                    callResult = new CallResult<T>(default, desResult.Error);
+                    callResult = new CallResult<T>(desResult.Error!);
                     return true;
                 }
 
-                callResult = new CallResult<T>(desResult.Data, null);
+                callResult = new CallResult<T>(desResult.Data);
                 return true;
             }
         }
@@ -155,19 +155,19 @@ namespace CoinEx.Net.Clients
             if (!subResponse)
             {
                 log.Write(LogLevel.Warning, "Subscription failed: " + subResponse.Error);
-                callResult = new CallResult<object>(null, subResponse.Error);
+                callResult = new CallResult<object>(subResponse.Error!);
                 return true;
             }
 
             if (subResponse.Data.Error != null)
             {
                 log.Write(LogLevel.Debug, $"Failed to subscribe: {subResponse.Data.Error.Code} {subResponse.Data.Error.Message}");
-                callResult = new CallResult<object>(null, new ServerError(subResponse.Data.Error.Code, subResponse.Data.Error.Message));
+                callResult = new CallResult<object>(new ServerError(subResponse.Data.Error.Code, subResponse.Data.Error.Message));
                 return true;
             }
 
             log.Write(LogLevel.Debug, "Subscription completed");
-            callResult = new CallResult<object>(subResponse, null);
+            callResult = new CallResult<object>(subResponse);
             return true;
         }
 
@@ -201,10 +201,10 @@ namespace CoinEx.Net.Clients
         protected override async Task<CallResult<bool>> AuthenticateSocketAsync(SocketConnection s)
         {
             if (s.ApiClient.AuthenticationProvider == null)
-                return new CallResult<bool>(false, new NoApiCredentialsError());
+                return new CallResult<bool>(new NoApiCredentialsError());
 
             var request = new CoinExSocketRequest(NextId(), ServerSubject, AuthenticateAction, GetAuthParameters(s.ApiClient));
-            var result = new CallResult<bool>(false, new ServerError("No response from server"));
+            var result = new CallResult<bool>(new ServerError("No response from server"));
             await s.SendAndWaitAsync(request, ClientOptions.SocketResponseTimeout, data =>
             {
                 var idField = data["id"];
@@ -218,7 +218,7 @@ namespace CoinEx.Net.Clients
                 if (!authResponse)
                 {
                     log.Write(LogLevel.Warning, "Authorization failed: " + authResponse.Error);
-                    result = new CallResult<bool>(false, authResponse.Error);
+                    result = new CallResult<bool>(authResponse.Error!);
                     return true;
                 }
 
@@ -226,19 +226,19 @@ namespace CoinEx.Net.Clients
                 {
                     var error = new ServerError(authResponse.Data.Error.Code, authResponse.Data.Error.Message);
                     log.Write(LogLevel.Debug, "Failed to authenticate: " + error);
-                    result = new CallResult<bool>(false, error);
+                    result = new CallResult<bool>(error);
                     return true;
                 }
 
                 if (authResponse.Data.Result.Status != SuccessString)
                 {
                     log.Write(LogLevel.Debug, "Failed to authenticate: " + authResponse.Data.Result.Status);
-                    result = new CallResult<bool>(false, new ServerError(authResponse.Data.Result.Status));
+                    result = new CallResult<bool>(new ServerError(authResponse.Data.Result.Status));
                     return true;
                 }
 
                 log.Write(LogLevel.Debug, "Authorization completed");
-                result = new CallResult<bool>(true, null);
+                result = new CallResult<bool>(true);
                 return true;
             }).ConfigureAwait(false);
 

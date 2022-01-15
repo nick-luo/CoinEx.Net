@@ -110,7 +110,7 @@ namespace CoinEx.Net.Clients
         private static WebCallResult<T> GetResult<T>(WebCallResult<CoinExApiResult<T>> result) where T : class
         {
             if (result.Error != null || result.Data == null)
-                return WebCallResult<T>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error ?? new UnknownError("No data received"));
+                return result.AsError<T>(result.Error ?? new UnknownError("No data received"));
 
             return result.As(result.Data.Data);
         }
@@ -118,9 +118,9 @@ namespace CoinEx.Net.Clients
         private static WebCallResult GetResult(WebCallResult<CoinExApiResult<object>> result)
         {
             if (result.Error != null || result.Data == null)
-                return WebCallResult.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error ?? new UnknownError("No data received"));
+                return result.AsDatalessError(result.Error ?? new UnknownError("No data received"));
 
-            return new WebCallResult(result.ResponseStatusCode, result.ResponseHeaders, null);
+            return result.AsDataless();
         }
 
         internal void InvokeOrderPlaced(OrderId id)

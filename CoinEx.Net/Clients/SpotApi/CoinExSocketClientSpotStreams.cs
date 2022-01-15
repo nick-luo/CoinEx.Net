@@ -67,7 +67,7 @@ namespace CoinEx.Net.Clients.SpotApi
         public async Task<CallResult<bool>> PingAsync()
         {
             var result = await _baseClient.QueryInternalAsync<string>(this, new CoinExSocketRequest(_baseClient.NextIdInternal(), ServerSubject, PingAction), false).ConfigureAwait(false);
-            return new CallResult<bool>(result.Success, result.Error);
+            return result.As(result.Success);
         }
 
         /// <inheritdoc />
@@ -75,8 +75,8 @@ namespace CoinEx.Net.Clients.SpotApi
         {
             var result = await _baseClient.QueryInternalAsync<long>(this, new CoinExSocketRequest(_baseClient.NextIdInternal(), ServerSubject, ServerTimeAction), false).ConfigureAwait(false);
             if (!result)
-                return new CallResult<DateTime>(default, result.Error);
-            return new CallResult<DateTime>(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(result.Data), null);
+                return new CallResult<DateTime>(result.Error!);
+            return new CallResult<DateTime>(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(result.Data));
         }
 
         /// <inheritdoc />
