@@ -3,6 +3,8 @@ title: Migrate V4 to V5
 nav_order: 4
 ---
 
+## Migrate from version V4.x.x to V5.x.x
+
 There are a decent amount of breaking changes when moving from version 4.x.x to version 5.x.x. Although the interface has changed, the available endpoints/information have not, so there should be no need to completely rewrite your program.
 Most endpoints are now available under a slightly different name or path, and most data models have remained the same, barring a few renames.
 In this document most changes will be described. If you have any other questions or issues when updating, feel free to open an issue.
