@@ -5,8 +5,7 @@ CoinEx.Net is a wrapper around the CoinEx API as described on [CoinEx](https://g
 
 **If you think something is broken, something is missing or have any questions, please open an [Issue](https://github.com/JKorf/CoinEx.Net/issues)**
 
-## CryptoExchange.Net
-This library is build upon the CryptoExchange.Net library, make sure to check out the documentation on that for basic usage: [docs](https://github.com/JKorf/CryptoExchange.Net)
+[Documentation](https://jkorf.github.io/CoinEx.Net/)
 
 ## Donations
 I develop and maintain this package on my own for free in my spare time. Donations are greatly appreciated. If you prefer to donate any other currency please contact me.
@@ -17,68 +16,6 @@ I develop and maintain this package on my own for free in my spare time. Donatio
 
 ## Discord
 A Discord server is available [here](https://discord.gg/MSpeEtSY8t). Feel free to join for discussion and/or questions around the CryptoExchange.Net and implementation libraries.
-
-## Getting started
-Make sure you have installed the CoinEx.Net [Nuget](https://www.nuget.org/packages/CoinEx.Net/) package and add `using CoinEx.Net` to your usings.  You now have access to 2 clients:  
-**CoinExClient**  
-The client to interact with the CoinExREST API. Getting prices:
-````C#
-var client = new CoinExClient(new CoinExClientOptions(){
- // Specify options for the client
-});
-var callResult = await client.GetSymbolStatesAsync();
-// Make sure to check if the call was successful
-if(!callResult.Success)
-{
-  // Call failed, check callResult.Error for more info
-}
-else
-{
-  // Call succeeded, callResult.Data will have the resulting data
-}
-````
-
-Placing an order:
-````C#
-var client = new CoinExClient(new CoinExClientOptions(){
- // Specify options for the client
- ApiCredentials = new ApiCredentials("Key", "Secret")
-});
-var callResult = await client.PlaceLimitOrderAsync("BTC-USDT", TransactionType.Buy, 50, 10);
-// Make sure to check if the call was successful
-if(!callResult.Success)
-{
-  // Call failed, check callResult.Error for more info
-}
-else
-{
-  // Call succeeded, callResult.Data will have the resulting data
-}
-````
-
-**CoinExSocketClient**  
-The client to interact with the CoinEx websocket API. Basic usage:
-````C#
-var client = new CoinExSocketClient(new CoinExSocketClientOptions()
-{
-  // Specify options for the client
-});
-var subscribeResult = client.SubscribeToSymbolStateUpdatesAsync("ETHBTC", data => {
-  // Handle data when it is received
-});
-// Make sure to check if the subscritpion was successful
-if(!subscribeResult.Success)
-{
-  // Subscription failed, check callResult.Error for more info
-}
-else
-{
-  // Subscription succeeded, the handler will start receiving data when it is available
-}
-````
-
-## Client options
-For the basic client options see also the CryptoExchange.Net [docs](https://github.com/JKorf/CryptoExchange.Net#client-options). 
 
 ## Release notes
 * Version 5.0.0-beta1 - 15 Jan 2022
