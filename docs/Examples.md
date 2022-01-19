@@ -6,7 +6,7 @@ nav_order: 3
 ## Basic operations
 Make sure to read the [CryptoExchange.Net documentation](https://jkorf.github.io/CryptoExchange.Net/Clients.html#processing-request-responses) on processing responses.
 
-#### Get market data
+### Get market data
 ```csharp
 // Getting info on all symbols
 var symbolData = await coinexClient.SpotApi.ExchangeData.GetSymbolsAsync();
@@ -21,11 +21,11 @@ var orderBookData = await coinexClient.SpotApi.ExchangeData.GetOrderBookAsync("B
 var tradeHistoryData = await coinexClient.SpotApi.ExchangeData.GetTradeHistoryAsync("BTC-USDT");
 ```
 
-#### Requesting balances
+### Requesting balances
 ```csharp
 var accountData = await coinexClient.SpotApi.Account.GetAccountsAsync();
 ```
-#### Placing order
+### Placing order
 ```csharp
 // Placing a buy limit order for 0.001 BTC at a price of 50000USDT each
 var orderData = await coinexClient.SpotApi.Trading.PlaceOrderAsync(
@@ -46,30 +46,30 @@ var orderData = await coinexClient.SpotApi.Trading.PlaceOrderAsync(
                 stopPrice: 40000);
 ```
 
-#### Requesting a specific order
+### Requesting a specific order
 ```csharp
 // Request info on order with id `1234`
 var orderData = await coinexClient.SpotApi.Trading.GetOrderAsync("BTCUSDT", 1234);
 ```
 
-#### Requesting order history
+### Requesting order history
 ```csharp
 // Get all closed orders conform the parameters
  var ordersData = await coinexClient.SpotApi.Trading.GetClosedOrdersAsync("BTCUSDT");
 ```
 
-#### Cancel order
+### Cancel order
 ```csharp
 // Cancel order with id `1234`
 var orderData = await coinexClient.SpotApi.Trading.CancelOrderAsync("BTCUSDT", 1234);
 ```
 
-#### Get user trades
+### Get user trades
 ```csharp
 var userTradesResult = await coinexClient.SpotApi.Trading.GetUserTradesAsync("BTCUSDT");
 ```
 
-#### Subscribing to market data updates
+### Subscribing to market data updates
 ```csharp
 var subscribeResult = await coinexSocket.SpotStreams.SubscribeToAllTickerUpdatesAsync(data =>
 {
@@ -77,7 +77,7 @@ var subscribeResult = await coinexSocket.SpotStreams.SubscribeToAllTickerUpdates
 });
 ```
 
-#### Subscribing to order updates
+### Subscribing to order updates
 ```csharp
 var subscribeResult = await kucoinSocketClient.SpotStreams.SubscribeToOrderUpdatesAsync(data =>
 {

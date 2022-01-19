@@ -1,8 +1,13 @@
+---
+title: Migrate V4 to V5
+nav_order: 4
+---
+
 There are a decent amount of breaking changes when moving from version 4.x.x to version 5.x.x. Although the interface has changed, the available endpoints/information have not, so there should be no need to completely rewrite your program.
 Most endpoints are now available under a slightly different name or path, and most data models have remained the same, barring a few renames.
 In this document most changes will be described. If you have any other questions or issues when updating, feel free to open an issue.
 
-Changes related to `IExchangeClient`, options and client structure are also (partially) covered in the [CryptoExchange.Net Migration Guide](https://github.com/JKorf/CryptoExchange.Net/wiki/Migration-Guide)
+Changes related to `IExchangeClient`, options and client structure are also (partially) covered in the [CryptoExchange.Net Migration Guide](https://jkorf.github.io/CryptoExchange.Net/Migration%20Guide.html)
 
 ### Namespaces
 There are a few namespace changes: 
@@ -41,7 +46,7 @@ var coinExClient = new CoinExClient(new CoinExClientOptions
 ```
 
 ### Client structure
-Version 5 adds the `SpotApi` Api client under the `CoinExClient`, and a topic underneath that. This is done to keep the same client structure as other exchange implementations, more info on this [here](https://github.com/Jkorf/CryptoExchange.Net/wiki/Clients).
+Version 5 adds the `SpotApi` Api client under the `CoinExClient`, and a topic underneath that. This is done to keep the same client structure as other exchange implementations, more info on this [here](https://jkorf.github.io/CryptoExchange.Net/Clients.html).
 In the `CoinExSocketClient` a `SpotStreams` Api client is added. This means all calls will have changed, though most will only need to add `SpotApi.[Topic].XXX`/`SpotStreams.XXX`:
 
 *V5*
