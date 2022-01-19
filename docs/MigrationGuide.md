@@ -5,7 +5,8 @@ In this document most changes will be described. If you have any other questions
 Changes related to `IExchangeClient`, options and client structure are also (partially) covered in the [CryptoExchange.Net Migration Guide](https://github.com/JKorf/CryptoExchange.Net/wiki/Migration-Guide)
 
 ### Namespaces
-There are a few namespace changes:  
+There are a few namespace changes: 
+ 
 |Type|Old|New|
 |----|---|---|
 |Enums|`CoinEx.Net.Objects`|`CoinEx.Net.Enums`  |
@@ -17,17 +18,17 @@ There are a few namespace changes:
 ### Client options
 The `BaseAddress` and rate limiting options are now under the `SpotApiOptions`.  
 *V4*
-````C#
+```csharp
 var coinExClient = new CoinExClient(new CoinExClientOptions
 {
 	ApiCredentials = new ApiCredentials("API-KEY", "API-SECRET"),
 	BaseAddress = "ADDRESS",
 	RateLimitingBehaviour = RateLimitingBehaviour.Fail
 });
-````
+```
 
 *V5*
-````C#
+```csharp
 var coinExClient = new CoinExClient(new CoinExClientOptions
 {
 	ApiCredentials = new ApiCredentials("API-KEY", "API-SECRET"),
@@ -37,14 +38,14 @@ var coinExClient = new CoinExClient(new CoinExClientOptions
 		RateLimitingBehaviour = RateLimitingBehaviour.Fail
 	}
 });
-````
+```
 
 ### Client structure
 Version 5 adds the `SpotApi` Api client under the `CoinExClient`, and a topic underneath that. This is done to keep the same client structure as other exchange implementations, more info on this [here](https://github.com/Jkorf/CryptoExchange.Net/wiki/Clients).
 In the `CoinExSocketClient` a `SpotStreams` Api client is added. This means all calls will have changed, though most will only need to add `SpotApi.[Topic].XXX`/`SpotStreams.XXX`:
 
 *V5*
-````C#
+```csharp
 var balances = await coinexClient.GetBalancesAsync();
 var withdrawals = await coinexClient.GetWithdrawalHistoryAsync();
 
@@ -55,10 +56,10 @@ var order = await coinexClient.PlaceLimitOrderAsync();
 var trades = await coinexClient.GetUserTradesAsync("BTCUSDT", 1, 10);
 
 var sub = coinexSocket.SubscribeToSymbolStateUpdatesAsync("BTCUSDT", DataHandler);
-````
+```
 
 *V6*  
-````C#
+```csharp
 var balances = await coinexClient.SpotApi.Account.GetBalancesAsync();
 var withdrawals = await coinexClient.SpotApi.Account.GetWithdrawalHistoryAsync();
 
@@ -69,10 +70,11 @@ var order = await coinexClient.SpotApi.Trading.PlaceOrderAsync();
 var trades = await coinexClient.SpotApi.Trading.GetUserTradesAsync("BTCUSDT");
 
 var sub = coinexSocket.SpotStreams.SubscribeToTickerUpdatesAsync("BTCUSDT", DataHandler);
-````
+```
 
 ### Definitions
 Some names have been changed to a common definition. This includes where the name is part of a bigger name  
+
 |Old|New||
 |----|---|---|
 |`Currency`|`Asset`|`GetCurrenciesAsync` -> `GetAssetsAsync`|
@@ -87,7 +89,7 @@ Some names have been changed to a common definition. This includes where the nam
 ### Changed methods
 Previously there were different PlaceOrder methods from different types, for example PlaceLimitOrder, PlaceMarketOrder etc. This is because the API has separate endpoints for different types. To keep it more in line with other CryptoExchange.Net implementations this has been combined to a single PlaceOrder call:  
 *V5*
-````C#
+```csharp
 // Limit order
 await coinexClient.PlaceLimitOrderAsync(
 	"BTCUSDT",
@@ -100,10 +102,10 @@ await coinexClient.PlaceMarketOrderAsync(
 	"BTCUSDT",
 	TransactionType.Buy,
 	0.001m);
-````
+```
 
 *V6*
-````C#
+```csharp
 // Limit order
 await coinexClient.SpotApi.Trading.PlaceOrderAsync(
 	"BTCUSDT",
@@ -118,5 +120,5 @@ await coinexClient.SpotApi.Trading.PlaceOrderAsync(
 	OrderSide.Buy,
 	OrderType.Market,
 	0.001m);
-````
+```
 

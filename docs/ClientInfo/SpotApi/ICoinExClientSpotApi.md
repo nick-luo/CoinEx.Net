@@ -1,7 +1,7 @@
 ---
 title: ICoinExClientSpotApi
 has_children: true
-parent: ICoinExClient
+parent: Rest API documentation
 ---
 *[generated documentation]*  
 `CoinExClient > SpotApi`  

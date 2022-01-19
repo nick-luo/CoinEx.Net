@@ -2,7 +2,7 @@
 title: ICoinExClientSpotApiExchangeData
 has_children: false
 parent: ICoinExClientSpotApi
-grand_parent: ICoinExClient
+grand_parent: Rest API documentation
 ---
 *[generated documentation]*  
 `CoinExClient > SpotApi > ExchangeData`  
