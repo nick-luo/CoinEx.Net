@@ -1,4 +1,6 @@
-﻿using CoinEx.Net.Converters;
+﻿using System;
+using CoinEx.Net.Converters;
+using CryptoExchange.Net.Converters;
 using Newtonsoft.Json;
 
 namespace CoinEx.Net.Objects.Models
@@ -22,5 +24,10 @@ namespace CoinEx.Net.Objects.Models
         /// </summary>
         [JsonConverter(typeof(DecimalConverter))]
         public decimal Frozen { get; set; }
+        /// <summary>
+        /// Data timestamp
+        /// </summary>
+        [JsonConverter(typeof(DateTimeConverter))]
+        public DateTime? Timestamp { get; set; }
     }
 }

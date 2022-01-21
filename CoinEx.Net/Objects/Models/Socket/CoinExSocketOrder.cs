@@ -122,5 +122,31 @@ namespace CoinEx.Net.Objects.Models.Socket
         /// </summary>
         [JsonProperty("client_id")]
         public string ClientOrderId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Quantity of the last trade filled for this order
+        /// </summary>
+        [JsonProperty("last_deal_amount")]
+        public decimal? LastTradeQuantity { get; set; }
+        /// <summary>
+        /// Price of the last trade filled for this order
+        /// </summary>
+        [JsonProperty("last_deal_price")]
+        public decimal? LastTradePrice { get; set; }
+        /// <summary>
+        /// Timestamp of the last trade filled for this order
+        /// </summary>
+        [JsonProperty("last_deal_time"), JsonConverter(typeof(DateTimeConverter))]
+        public DateTime? LastTradeTime { get; set; }
+        /// <summary>
+        /// Id of the last trade filled for this order
+        /// </summary>
+        [JsonProperty("last_deal_id")]
+        public long? LastTradeId { get; set; }
+        /// <summary>
+        /// Role of the last trade filled for this order
+        /// </summary>
+        [JsonProperty("last_role")]
+        public TransactionRole? LastTradeRole { get; set; }
     }
 }
