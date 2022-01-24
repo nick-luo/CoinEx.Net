@@ -122,16 +122,16 @@ Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetClosedOrdersAsync(string 
 
 ```csharp  
 var client = new CoinExClient();  
-var result = await client.SpotApi.Trading.GetOpenOrdersAsync(/* parameters */);  
+var result = await client.SpotApi.Trading.GetOpenOrdersAsync();  
 ```  
 
 ```csharp  
-Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenOrdersAsync(string symbol, int? page = default, int? limit = default, CancellationToken ct = default);  
+Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenOrdersAsync(string? symbol = default, int? page = default, int? limit = default, CancellationToken ct = default);  
 ```  
 
 |Parameter|Description|
 |---|---|
-|symbol|The symbol to retrieve the open orders for|
+|_[Optional]_ symbol|The symbol to retrieve the open orders for|
 |_[Optional]_ page|The page of the resulting list|
 |_[Optional]_ limit|The number of results per page|
 |_[Optional]_ ct|Cancellation token|
