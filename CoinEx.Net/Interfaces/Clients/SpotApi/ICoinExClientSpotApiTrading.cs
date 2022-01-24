@@ -53,7 +53,7 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
         /// <param name="limit">The number of results per page</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>List of open orders for a symbol</returns>
-        Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenOrdersAsync(string symbol, int? page = null, int? limit = null, CancellationToken ct = default);
+        Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenOrdersAsync(string? symbol = null, int? page = null, int? limit = null, CancellationToken ct = default);
 
         /// <summary>
         /// Retrieves a list of open stop orders for a symbol. Requires API credentials

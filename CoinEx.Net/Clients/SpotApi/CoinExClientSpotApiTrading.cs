@@ -42,8 +42,8 @@ namespace CoinEx.Net.Clients.SpotApi
         /// <inheritdoc />
         public async Task<WebCallResult<CoinExOrder>> PlaceOrderAsync(
             string symbol,
-            Enums.OrderSide side,
-            Enums.OrderType type,
+            OrderSide side,
+            OrderType type,
             decimal quantity,
 
             decimal? price = null,
@@ -57,18 +57,18 @@ namespace CoinEx.Net.Clients.SpotApi
             symbol.ValidateCoinExSymbol();
 
             var endpoint = "";
-            if (type == Enums.OrderType.Limit)
+            if (type == OrderType.Limit)
                 endpoint = PlaceLimitOrderEndpoint;
-            else if (type == Enums.OrderType.Market)
+            else if (type == OrderType.Market)
                 endpoint = PlaceMarketOrderEndpoint;
-            else if (type == Enums.OrderType.StopLimit)
+            else if (type == OrderType.StopLimit)
                 endpoint = PlaceStopLimitOrderEndpoint;
-            else if (type == Enums.OrderType.StopMarket)
+            else if (type == OrderType.StopMarket)
                 endpoint = PlaceStopMarketOrderEndpoint;
 
             if (immediateOrCancel == true)
             {
-                if (type != Enums.OrderType.Limit)
+                if (type != OrderType.Limit)
                     throw new ArgumentException("ImmediateOrCancel only valid for limit orders");
 
                 endpoint = PlaceImmediateOrCancelOrderEndpoint;
@@ -94,16 +94,17 @@ namespace CoinEx.Net.Clients.SpotApi
         }
 
         /// <inheritdoc />
-        public async Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenOrdersAsync(string symbol, int? page = null, int? limit = null, CancellationToken ct = default)
+        public async Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenOrdersAsync(string? symbol = null, int? page = null, int? limit = null, CancellationToken ct = default)
         {
-            symbol.ValidateCoinExSymbol();
+            symbol?.ValidateCoinExSymbol();
             limit?.ValidateIntBetween(nameof(limit), 1, 100);
             var parameters = new Dictionary<string, object>
             {
-                { "market", symbol },
                 { "page", page ?? 1 },
                 { "limit", limit ?? 100 }
             };
+
+            parameters.AddOptionalParameter("market", symbol);
 
             return await _baseClient.ExecutePaged<CoinExOrder>(_baseClient.GetUrl(OpenOrdersEndpoint), HttpMethod.Get, ct, parameters, true).ConfigureAwait(false);
         }
@@ -111,15 +112,14 @@ namespace CoinEx.Net.Clients.SpotApi
         /// <inheritdoc />
         public async Task<WebCallResult<CoinExPagedResult<CoinExOrder>>> GetOpenStopOrdersAsync(string symbol, int? page = null, int? limit = null, CancellationToken ct = default)
         {
-            symbol.ValidateCoinExSymbol();
+            symbol?.ValidateCoinExSymbol();
             limit?.ValidateIntBetween(nameof(limit), 1, 100);
             var parameters = new Dictionary<string, object>
             {
-                { "market", symbol },
                 { "page", page ?? 1 },
                 { "limit", limit ?? 100 }
             };
-
+            parameters.AddOptionalParameter("market", symbol);
             return await _baseClient.ExecutePaged<CoinExOrder>(_baseClient.GetUrl(OpenStopOrdersEndpoint), HttpMethod.Get, ct, parameters, true).ConfigureAwait(false);
         }
 
