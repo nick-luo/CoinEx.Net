@@ -271,7 +271,7 @@ namespace CoinEx.Net.Clients.SpotApi
                 }
 
                 foreach (var item in desResult.Data)
-                    item.Value.Symbol = item.Key;
+                    item.Value.Asset = item.Key;
 
                 onMessage(data.As<IEnumerable<CoinExBalance>>(desResult.Data.Values, null));
             });

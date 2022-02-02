@@ -35,7 +35,7 @@ namespace CoinEx.Net.Clients.SpotApi
             if (result)
             {
                 foreach (var b in result.Data)
-                    b.Value.Symbol = b.Key;
+                    b.Value.Asset = b.Key;
             }
 
             return result;

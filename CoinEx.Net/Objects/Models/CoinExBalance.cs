@@ -11,9 +11,9 @@ namespace CoinEx.Net.Objects.Models
     public class CoinExBalance
     {
         /// <summary>
-        /// The symbol
+        /// The asset
         /// </summary>
-        public string Symbol { get; set; } = string.Empty;
+        public string Asset { get; set; } = string.Empty;
         /// <summary>
         /// The quantity of the asset that is available
         /// </summary>
