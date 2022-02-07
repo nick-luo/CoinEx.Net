@@ -107,10 +107,10 @@ namespace CoinEx.Net.Clients.SpotApi
         /// <param name="quoteAsset"></param>
         /// <returns></returns>
         public string GetSymbolName(string baseAsset, string quoteAsset) => (baseAsset + quoteAsset).ToUpperInvariant();
-#pragma warning disable 1066
-        async Task<WebCallResult<IEnumerable<Symbol>>> IBaseRestClient.GetSymbolsAsync()
+
+        async Task<WebCallResult<IEnumerable<Symbol>>> IBaseRestClient.GetSymbolsAsync(CancellationToken ct)
         {
-            var symbols = await ExchangeData.GetSymbolInfoAsync().ConfigureAwait(false);
+            var symbols = await ExchangeData.GetSymbolInfoAsync(ct: ct).ConfigureAwait(false);
             if (!symbols)
                 return symbols.As<IEnumerable<Symbol>>(null);
 
@@ -124,12 +124,12 @@ namespace CoinEx.Net.Clients.SpotApi
             }));
         }
 
-        async Task<WebCallResult<Ticker>> IBaseRestClient.GetTickerAsync(string symbol)
+        async Task<WebCallResult<Ticker>> IBaseRestClient.GetTickerAsync(string symbol, CancellationToken ct)
         {
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetTickerAsync), nameof(symbol));
 
-            var tickers = await ExchangeData.GetTickerAsync(symbol).ConfigureAwait(false);
+            var tickers = await ExchangeData.GetTickerAsync(symbol, ct: ct).ConfigureAwait(false);
             if (!tickers)
                 return tickers.As<Ticker>(null);
 
@@ -145,9 +145,9 @@ namespace CoinEx.Net.Clients.SpotApi
             });
         }
 
-        async Task<WebCallResult<IEnumerable<Ticker>>> IBaseRestClient.GetTickersAsync()
+        async Task<WebCallResult<IEnumerable<Ticker>>> IBaseRestClient.GetTickersAsync(CancellationToken ct)
         {
-            var tickers = await ExchangeData.GetTickersAsync().ConfigureAwait(false);
+            var tickers = await ExchangeData.GetTickersAsync(ct: ct).ConfigureAwait(false);
             if (!tickers)
                 return tickers.As<IEnumerable<Ticker>>(null);
 
@@ -164,7 +164,7 @@ namespace CoinEx.Net.Clients.SpotApi
                 }));
         }
 
-        async Task<WebCallResult<IEnumerable<Kline>>> IBaseRestClient.GetKlinesAsync(string symbol, TimeSpan timespan, DateTime? startTime = null, DateTime? endTime = null, int? limit = null)
+        async Task<WebCallResult<IEnumerable<Kline>>> IBaseRestClient.GetKlinesAsync(string symbol, TimeSpan timespan, DateTime? startTime, DateTime? endTime, int? limit, CancellationToken ct)
         {
             if (startTime != null || endTime != null)
                 throw new ArgumentException("CoinEx does not support time based klines requesting", startTime != null ? nameof(startTime) : nameof(endTime));
@@ -172,7 +172,7 @@ namespace CoinEx.Net.Clients.SpotApi
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetKlinesAsync), nameof(symbol));
 
-            var klines = await ExchangeData.GetKlinesAsync(symbol, GetKlineIntervalFromTimespan(timespan), limit).ConfigureAwait(false);
+            var klines = await ExchangeData.GetKlinesAsync(symbol, GetKlineIntervalFromTimespan(timespan), limit, ct: ct).ConfigureAwait(false);
             if (!klines)
                 return klines.As<IEnumerable<Kline>>(null);
 
@@ -189,12 +189,12 @@ namespace CoinEx.Net.Clients.SpotApi
                 }));
         }
 
-        async Task<WebCallResult<OrderBook>> IBaseRestClient.GetOrderBookAsync(string symbol)
+        async Task<WebCallResult<OrderBook>> IBaseRestClient.GetOrderBookAsync(string symbol, CancellationToken ct)
         {
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetOrderBookAsync), nameof(symbol));
 
-            var book = await ExchangeData.GetOrderBookAsync(symbol, 0).ConfigureAwait(false);
+            var book = await ExchangeData.GetOrderBookAsync(symbol, 0, ct: ct).ConfigureAwait(false);
             if (!book)
                 return book.As<OrderBook>(null);
 
@@ -206,12 +206,12 @@ namespace CoinEx.Net.Clients.SpotApi
             });
         }
 
-        async Task<WebCallResult<IEnumerable<Trade>>> IBaseRestClient.GetRecentTradesAsync(string symbol)
+        async Task<WebCallResult<IEnumerable<Trade>>> IBaseRestClient.GetRecentTradesAsync(string symbol, CancellationToken ct)
         {
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetRecentTradesAsync), nameof(symbol));
 
-            var trades = await ExchangeData.GetTradeHistoryAsync(symbol).ConfigureAwait(false);
+            var trades = await ExchangeData.GetTradeHistoryAsync(symbol, ct: ct).ConfigureAwait(false);
             if (!trades)
                 return trades.As<IEnumerable<Trade>>(null);
 
@@ -226,7 +226,7 @@ namespace CoinEx.Net.Clients.SpotApi
                 }));
         }
 
-        async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price = null, string? accountId = null)
+        async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price, string? accountId, CancellationToken ct)
         {
             if (price == null && type == CommonOrderType.Limit)
                 throw new ArgumentException("Price parameter null while placing a limit order", nameof(price));
@@ -239,14 +239,14 @@ namespace CoinEx.Net.Clients.SpotApi
                 side == CommonOrderSide.Sell ? OrderSide.Sell : OrderSide.Buy,
                 type == CommonOrderType.Limit ? OrderType.Limit : OrderType.Market,
                 quantity,
-                price).ConfigureAwait(false);
+                price, ct: ct).ConfigureAwait(false);
             if (!result)
                 return result.As<OrderId>(null);
 
             return result.As(new OrderId { SourceObject = result.Data, Id = result.Data.Id.ToString(CultureInfo.InvariantCulture) });
         }
 
-        async Task<WebCallResult<Order>> IBaseRestClient.GetOrderAsync(string orderId, string? symbol = null)
+        async Task<WebCallResult<Order>> IBaseRestClient.GetOrderAsync(string orderId, string? symbol, CancellationToken ct)
         {
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetOrderAsync), nameof(symbol));
@@ -254,7 +254,7 @@ namespace CoinEx.Net.Clients.SpotApi
             if (!long.TryParse(orderId, out var id))
                 throw new ArgumentException($"Invalid order id for CoinEx {nameof(ISpotClient.GetOrderAsync)}", nameof(orderId));
 
-            var order = await Trading.GetOrderAsync(symbol!, id).ConfigureAwait(false);
+            var order = await Trading.GetOrderAsync(symbol!, id, ct: ct).ConfigureAwait(false);
             if (!order)
                 return order.As<Order>(null);
 
@@ -273,12 +273,12 @@ namespace CoinEx.Net.Clients.SpotApi
             });
         }
 
-        async Task<WebCallResult<IEnumerable<UserTrade>>> IBaseRestClient.GetOrderTradesAsync(string orderId, string? symbol = null)
+        async Task<WebCallResult<IEnumerable<UserTrade>>> IBaseRestClient.GetOrderTradesAsync(string orderId, string? symbol, CancellationToken ct)
         {
             if (!long.TryParse(orderId, out var id))
                 throw new ArgumentException($"Invalid order id for CoinEx {nameof(ISpotClient.GetOrderAsync)}", nameof(orderId));
 
-            var result = await Trading.GetOrderTradesAsync(id, 1, 100).ConfigureAwait(false);
+            var result = await Trading.GetOrderTradesAsync(id, 1, 100, ct: ct).ConfigureAwait(false);
             if (!result)
                 return result.As<IEnumerable<UserTrade>>(null);
 
@@ -297,12 +297,12 @@ namespace CoinEx.Net.Clients.SpotApi
                 }));
         }
 
-        async Task<WebCallResult<IEnumerable<Order>>> IBaseRestClient.GetOpenOrdersAsync(string? symbol)
+        async Task<WebCallResult<IEnumerable<Order>>> IBaseRestClient.GetOpenOrdersAsync(string? symbol, CancellationToken ct)
         {
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentException($"CoinEx needs the {nameof(symbol)} parameter for the method {nameof(ISpotClient.GetOpenOrdersAsync)}");
 
-            var openOrders = await Trading.GetOpenOrdersAsync(symbol!, 1, 100).ConfigureAwait(false);
+            var openOrders = await Trading.GetOpenOrdersAsync(symbol!, 1, 100, ct: ct).ConfigureAwait(false);
             if (!openOrders)
                 return openOrders.As<IEnumerable<Order>>(null);
 
@@ -321,7 +321,7 @@ namespace CoinEx.Net.Clients.SpotApi
             }));
         }
 
-        async Task<WebCallResult<IEnumerable<Order>>> IBaseRestClient.GetClosedOrdersAsync(string? symbol)
+        async Task<WebCallResult<IEnumerable<Order>>> IBaseRestClient.GetClosedOrdersAsync(string? symbol, CancellationToken ct)
         {
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.GetClosedOrdersAsync), nameof(symbol));
@@ -329,7 +329,7 @@ namespace CoinEx.Net.Clients.SpotApi
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentException($"CoinEx needs the {nameof(symbol)} parameter for the method {nameof(ISpotClient.GetClosedOrdersAsync)}");
 
-            var result = await Trading.GetClosedOrdersAsync(symbol!, 1, 100).ConfigureAwait(false);
+            var result = await Trading.GetClosedOrdersAsync(symbol!, 1, 100, ct: ct).ConfigureAwait(false);
             if (!result)
                 return result.As<IEnumerable<Order>>(null);
 
@@ -348,7 +348,7 @@ namespace CoinEx.Net.Clients.SpotApi
             }));
         }
 
-        async Task<WebCallResult<OrderId>> IBaseRestClient.CancelOrderAsync(string orderId, string? symbol)
+        async Task<WebCallResult<OrderId>> IBaseRestClient.CancelOrderAsync(string orderId, string? symbol, CancellationToken ct)
         {
             if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentException(nameof(symbol) + " required for CoinEx " + nameof(ISpotClient.CancelOrderAsync), nameof(symbol));
@@ -356,7 +356,7 @@ namespace CoinEx.Net.Clients.SpotApi
             if (!long.TryParse(orderId, out var id))
                 throw new ArgumentException($"Invalid order id for CoinEx {nameof(ISpotClient.GetOrderAsync)}", nameof(orderId));
 
-            var result = await Trading.CancelOrderAsync(symbol!, id).ConfigureAwait(false);
+            var result = await Trading.CancelOrderAsync(symbol!, id, ct: ct).ConfigureAwait(false);
             if (!result)
                 return result.As<OrderId>(null);
 
@@ -367,9 +367,9 @@ namespace CoinEx.Net.Clients.SpotApi
             });
         }
 
-        async Task<WebCallResult<IEnumerable<Balance>>> IBaseRestClient.GetBalancesAsync(string? accountId = null)
+        async Task<WebCallResult<IEnumerable<Balance>>> IBaseRestClient.GetBalancesAsync(string? accountId, CancellationToken ct)
         {
-            var balances = await Account.GetBalancesAsync().ConfigureAwait(false);
+            var balances = await Account.GetBalancesAsync(ct: ct).ConfigureAwait(false);
             if (!balances)
                 return balances.As<IEnumerable<Balance>>(null);
 
@@ -381,7 +381,6 @@ namespace CoinEx.Net.Clients.SpotApi
                 Total = d.Value.Frozen + d.Value.Available
             }));
         }
-#pragma warning restore 1066
 
         private static KlineInterval GetKlineIntervalFromTimespan(TimeSpan timeSpan)
         {
