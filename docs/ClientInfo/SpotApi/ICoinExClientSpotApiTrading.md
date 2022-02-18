@@ -263,7 +263,7 @@ var result = await client.SpotApi.Trading.PlaceOrderAsync(/* parameters */);
 ```  
 
 ```csharp  
-Task<WebCallResult<CoinExOrder>> PlaceOrderAsync(string symbol, OrderSide side, OrderType type, decimal quantity, decimal? price = default, decimal? stopPrice = default, bool? immediateOrCancel = default, OrderOption? orderOption = default, string? clientId = default, string? sourceId = default, CancellationToken ct = default);  
+Task<WebCallResult<CoinExOrder>> PlaceOrderAsync(string symbol, OrderSide side, OrderType type, decimal quantity, decimal? price = default, decimal? stopPrice = default, bool? immediateOrCancel = default, OrderOption? orderOption = default, string? clientOrderId = default, string? sourceId = default, CancellationToken ct = default);  
 ```  
 
 |Parameter|Description|
@@ -276,7 +276,7 @@ Task<WebCallResult<CoinExOrder>> PlaceOrderAsync(string symbol, OrderSide side, 
 |_[Optional]_ stopPrice|The stop-price of a single unit of the order|
 |_[Optional]_ immediateOrCancel|True if the order should be filled immediately up on placing, otherwise it will be canceled|
 |_[Optional]_ orderOption|Option for the order|
-|_[Optional]_ clientId|Client id which can be used to match the order|
+|_[Optional]_ clientOrderId|Client id which can be used to match the order|
 |_[Optional]_ sourceId|User defined number|
 |_[Optional]_ ct|Cancellation token|
 

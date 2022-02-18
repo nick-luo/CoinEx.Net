@@ -18,42 +18,22 @@ I develop and maintain this package on my own for free in my spare time. Donatio
 A Discord server is available [here](https://discord.gg/MSpeEtSY8t). Feel free to join for discussion and/or questions around the CryptoExchange.Net and implementation libraries.
 
 ## Release notes
-* Version 5.0.0-beta4 - 05 Feb 2022
-    * Updated CryptoExchange.Net, adding Cancellation token support for Common interface and SymbolOrderBook
+* Version 5.0.0 - 18 Feb 2022
+	* Added Github.io page for documentation: https://jkorf.github.io/CoinEx.Net/
+	*  unit tests for parsing the returned JSON for each endpoint and subscription
+	* Added AddCoinEx extension method on IServiceCollection for easy dependency injection
+	* Added URL reference to API endpoint documentation for each endpoint
+	* Added default rate limiter
 
-* Version 5.0.0-beta3 - 31 Jan 2022
-    * Updated CryptoExchange.Net
+	* Refactored different PlaceOrderAsync methods to a single PlaceOrderAsync method to be consistent across exchange implementations
+	* Refactored client structure to be consistent across exchange implementations
+	* Renamed various properties to be consistent across exchange implementations
 
-* Version 5.0.0-beta2 - 24 Jan 2022
-    * Made GetOpenOrdersAsync and GetOpenStopOrdersAsync symbol parameter optional
-    * Updated CryptoExchange.Net
+	* Cleaned up project structure
+	* Fixed various models
 
-* Version 5.0.0-beta1 - 15 Jan 2022
-    * Updated CryptoExchange.Net
-
-* Version 5.0.0-alpha7 - 14 Jan 2022
-    * Added checksum validation order books
-    * Added network parameter for WithdrawAsync
-
-* Version 5.0.0-alpha6 - 07 Jan 2022
-    * Updated CrytpoExchange.Net
-    * Added optional parameter for socket client lifetime in AddCoinEx
-
-* Version 5.0.0-alpha5 - 03 Jan 2022
-    * Updated CryptoExchange.Net
-
-* Version 5.0.0-alpha4 - 01 Jan 2022
-    * New comon implementation, added AddCoinEx extension method
-
-* Version 5.0.0-alpha3 - 27 Dec 2021
-    * Fixed ticker deserializerion
-    * Updated CryptoExchange.Net
-
-* Version 5.0.0-alpha2 - 21 Dec 2021
-    * Update to new CryptoExchange.Net version
-
-* Version 5.0.0-alpha1 - 07 Dec 2021
-    * Initial version new CryptoExchange.Net. More documentation coming soon
+	* Updated CryptoExchange.Net, see https://github.com/JKorf/CryptoExchange.Net#release-notes
+	* See https://jkorf.github.io/CoinEx.Net/MigrationGuide.html for additional notes for updating from V4 to V5
 
 * Version 4.2.4 - 03 Nov 2021
     * Updated CoinExAssetConfig model
