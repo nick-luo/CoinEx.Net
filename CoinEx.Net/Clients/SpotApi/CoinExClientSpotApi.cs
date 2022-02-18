@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.CommonObjects;
 using System.Globalization;
+using CryptoExchange.Net.Interfaces.CommonClients;
 
 namespace CoinEx.Net.Clients.SpotApi
 {
@@ -226,7 +227,7 @@ namespace CoinEx.Net.Clients.SpotApi
                 }));
         }
 
-        async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price, string? accountId, CancellationToken ct)
+        async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price, string? accountId, string? clientOrderId, CancellationToken ct)
         {
             if (price == null && type == CommonOrderType.Limit)
                 throw new ArgumentException("Price parameter null while placing a limit order", nameof(price));
@@ -239,7 +240,9 @@ namespace CoinEx.Net.Clients.SpotApi
                 side == CommonOrderSide.Sell ? OrderSide.Sell : OrderSide.Buy,
                 type == CommonOrderType.Limit ? OrderType.Limit : OrderType.Market,
                 quantity,
-                price, ct: ct).ConfigureAwait(false);
+                price,
+                clientOrderId: clientOrderId,
+                ct: ct).ConfigureAwait(false);
             if (!result)
                 return result.As<OrderId>(null);
 

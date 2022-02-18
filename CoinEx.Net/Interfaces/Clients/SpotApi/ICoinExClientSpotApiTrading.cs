@@ -26,7 +26,7 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
         /// <param name="orderOption">Option for the order</param>
         /// <param name="stopPrice">The stop-price of a single unit of the order</param>
         /// <param name="immediateOrCancel">True if the order should be filled immediately up on placing, otherwise it will be canceled</param>
-        /// <param name="clientId">Client id which can be used to match the order</param>
+        /// <param name="clientOrderId">Client id which can be used to match the order</param>
         /// <param name="sourceId">User defined number</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>Details of the order that was placed</returns>
@@ -40,7 +40,7 @@ namespace CoinEx.Net.Interfaces.Clients.SpotApi
             decimal? stopPrice = null,
             bool? immediateOrCancel = null,
             OrderOption? orderOption = null,
-            string? clientId = null,
+            string? clientOrderId = null,
             string? sourceId = null,
             CancellationToken ct = default);
 
